@@ -20,6 +20,7 @@ import android.content.DialogInterface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -50,9 +51,14 @@ public class VideoViewActivity extends Activity {
 	}
 	String tutorialvid = "/DCIM/Videos/vid.mp4";
 	String techSupportVid = "/DCIM/Videos/techsupport.mp4";
-	static String play = "/DCIM/Icons/continue-on.png";
-	static String replay = "/DCIM/Icons/Replay-on.png";
-	static String call = "/DCIM/Icons/call-on.png";
+	
+	static String play = "/DCIM/Icons/continue-off.png";
+	static String replay = "/DCIM/Icons/Replay-off.png";
+	static String call = "/DCIM/Icons/call-off.png";
+	
+	static String play_on = "/DCIM/Icons/continue-on.png";
+	static String replay_on = "/DCIM/Icons/Replay-on.png";
+	static String call_on = "/DCIM/Icons/call-on.png";
 	
 	int mCurrentKeyPoint;
 	List<keypoint> mKeyPoints = new ArrayList<keypoint>();
@@ -72,6 +78,26 @@ public class VideoViewActivity extends Activity {
 	    ImageButton buttonDialogPlay = (ImageButton) dialog.findViewById(R.id.play);
 	    String imagePath = Environment.getExternalStorageDirectory().toString() + play;
 	    buttonDialogPlay.setImageDrawable(Drawable.createFromPath(imagePath));
+	    buttonDialogPlay.setOnHoverListener(new View.OnHoverListener() {
+            @Override
+            public boolean onHover(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_HOVER_ENTER:
+                    	
+                	    String imagePath = Environment.getExternalStorageDirectory().toString() + play_on;
+                	    ((ImageButton)v).setImageDrawable(Drawable.createFromPath(imagePath));
+                        break;
+                    case MotionEvent.ACTION_HOVER_MOVE:
+                        
+                        break;
+                    case MotionEvent.ACTION_HOVER_EXIT:
+                	     imagePath = Environment.getExternalStorageDirectory().toString() + play;
+                	     ((ImageButton)v).setImageDrawable(Drawable.createFromPath(imagePath));
+                        break;
+                }
+                return false;
+            }
+        });
 	    buttonDialogPlay.setOnClickListener(new OnClickListener() {
 	        public void onClick(View v) {
 	            // Do your stuff...
@@ -86,6 +112,26 @@ public class VideoViewActivity extends Activity {
 	    ImageButton buttonDialogCall = (ImageButton) dialog.findViewById(R.id.call);
 	     imagePath = Environment.getExternalStorageDirectory().toString() + call;
 	    buttonDialogCall.setImageDrawable(Drawable.createFromPath(imagePath));
+	    buttonDialogCall.setOnHoverListener(new View.OnHoverListener() {
+            @Override
+            public boolean onHover(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_HOVER_ENTER:
+                    	
+                	    String imagePath = Environment.getExternalStorageDirectory().toString() + call_on;
+                	    ((ImageButton)v).setImageDrawable(Drawable.createFromPath(imagePath));
+                        break;
+                    case MotionEvent.ACTION_HOVER_MOVE:
+                        
+                        break;
+                    case MotionEvent.ACTION_HOVER_EXIT:
+                	     imagePath = Environment.getExternalStorageDirectory().toString() + call;
+                	     ((ImageButton)v).setImageDrawable(Drawable.createFromPath(imagePath));
+                        break;
+                }
+                return false;
+            }
+        });
 	    buttonDialogCall.setOnClickListener(new OnClickListener() {          
 	        public void onClick(View v) {
 	            // Do your stuff...
@@ -112,6 +158,26 @@ public class VideoViewActivity extends Activity {
 	    ImageButton buttonDialogReplay = (ImageButton) dialog.findViewById(R.id.replay);
 	    imagePath = Environment.getExternalStorageDirectory().toString() + replay;
 	    buttonDialogReplay.setImageDrawable(Drawable.createFromPath(imagePath));
+	    buttonDialogReplay.setOnHoverListener(new View.OnHoverListener() {
+            @Override
+            public boolean onHover(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_HOVER_ENTER:
+                    	
+                	    String imagePath = Environment.getExternalStorageDirectory().toString() + replay_on;
+                	    ((ImageButton)v).setImageDrawable(Drawable.createFromPath(imagePath));
+                        break;
+                    case MotionEvent.ACTION_HOVER_MOVE:
+                        
+                        break;
+                    case MotionEvent.ACTION_HOVER_EXIT:
+                	     imagePath = Environment.getExternalStorageDirectory().toString() + replay;
+                	     ((ImageButton)v).setImageDrawable(Drawable.createFromPath(imagePath));
+                        break;
+                }
+                return false;
+            }
+        });
 	    buttonDialogReplay.setOnClickListener(new OnClickListener() {
 	        public void onClick(View v) {
 	            // Do your stuff...
@@ -137,63 +203,6 @@ public class VideoViewActivity extends Activity {
 				videoview.pause();
 				
 				callAlert(VideoViewActivity.this);
-							
-				/*
-				//popup
-				AlertDialog.Builder ad = new AlertDialog.Builder(VideoViewActivity.this);
-				ad.setTitle("")
-	            .setPositiveButton("Continue",new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						///return
-						mCurrentKeyPoint = mCurrentKeyPoint > (mKeyPoints.size()-2) ? (mKeyPoints.size()-1) : (mCurrentKeyPoint+1);
-						keypoint kp = mKeyPoints.get(mCurrentKeyPoint);
-						videoview.start();
-						mhandler.postDelayed(pausevid,( kp.stop - kp.start)*1000);
-						
-					}
-				});
-				ad.setNegativeButton("Replay", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						mCurrentKeyPoint = mCurrentKeyPoint < (1) ? (0) : (mCurrentKeyPoint);
-						keypoint kp = mKeyPoints.get(mCurrentKeyPoint);
-						videoview.start();
-						videoview.seekTo(kp.start*1000);
-						mhandler.postDelayed(pausevid,( kp.stop - kp.start)*1000);
-					}
-				});
-				ad.setNeutralButton("Call Help",new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						videoview.stopPlayback();
-						Toast.makeText(VideoViewActivity.this, "Calling Tech Support...", Toast.LENGTH_LONG).show();
-						try{
-						loadVideo(videoview,techSupportVid);
-						videoview.requestFocus();
-						videoview.setOnPreparedListener(new OnPreparedListener() {
-							// Close the progress bar and play the video
-							public void onPrepared(MediaPlayer mp) {
-								videoview.start();
-							}
-						});
-						}
-						catch(Exception e)
-						{
-							Toast.makeText(VideoViewActivity.this, "Tech support is out for coffee.", Toast.LENGTH_LONG).show();
-						}
-											
-					}
-				});
-				AlertDialog dia = ad.create();
-				dia.show();
-				*/
 			}
 		}
 	};
