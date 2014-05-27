@@ -13,9 +13,18 @@ import android.os.Message;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.MediaController;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -41,10 +50,83 @@ public class VideoViewActivity extends Activity {
 	}
 	String tutorialvid = "/DCIM/Videos/vid.mp4";
 	String techSupportVid = "/DCIM/Videos/techsupport.mp4";
+	static String play = "/DCIM/Icons/continue-on.png";
+	static String replay = "/DCIM/Icons/Replay-on.png";
+	static String call = "/DCIM/Icons/call-on.png";
 	
 	int mCurrentKeyPoint;
 	List<keypoint> mKeyPoints = new ArrayList<keypoint>();
 	Handler mhandler;
+	
+	public void callAlert(final Context context){
+	    final Dialog dialog = new Dialog(context, android.R.style.Theme_DeviceDefault_NoActionBar);
+	    WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();  
+	    lp.dimAmount=0.9f;  
+	    lp.alpha= 0.5f;
+	    dialog.getWindow().setAttributes(lp);  
+	    dialog.getWindow().addFlags(WindowManager.LayoutParams.DIM_AMOUNT_CHANGED);
+	    dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+	    dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+	    dialog.setContentView(R.layout.custom_dialog_layout);             
+
+	    ImageButton buttonDialogPlay = (ImageButton) dialog.findViewById(R.id.play);
+	    String imagePath = Environment.getExternalStorageDirectory().toString() + play;
+	    buttonDialogPlay.setImageDrawable(Drawable.createFromPath(imagePath));
+	    buttonDialogPlay.setOnClickListener(new OnClickListener() {
+	        public void onClick(View v) {
+	            // Do your stuff...
+	            dialog.dismiss();
+				mCurrentKeyPoint = mCurrentKeyPoint > (mKeyPoints.size()-2) ? (mKeyPoints.size()-1) : (mCurrentKeyPoint+1);
+				keypoint kp = mKeyPoints.get(mCurrentKeyPoint);
+				videoview.start();
+				mhandler.postDelayed(pausevid,( kp.stop - kp.start)*1000);
+	        }           
+	    });
+	    
+	    ImageButton buttonDialogCall = (ImageButton) dialog.findViewById(R.id.call);
+	     imagePath = Environment.getExternalStorageDirectory().toString() + call;
+	    buttonDialogCall.setImageDrawable(Drawable.createFromPath(imagePath));
+	    buttonDialogCall.setOnClickListener(new OnClickListener() {          
+	        public void onClick(View v) {
+	            // Do your stuff...
+	            dialog.dismiss();
+	        	videoview.stopPlayback();
+				Toast.makeText(VideoViewActivity.this, "Calling Tech Support...", Toast.LENGTH_LONG).show();
+				try{
+				loadVideo(videoview,techSupportVid);
+				videoview.requestFocus();
+				videoview.setOnPreparedListener(new OnPreparedListener() {
+					// Close the progress bar and play the video
+					public void onPrepared(MediaPlayer mp) {
+						videoview.start();
+					}
+				});
+				}
+				catch(Exception e)
+				{
+					Toast.makeText(VideoViewActivity.this, "Tech support is out for coffee.", Toast.LENGTH_LONG).show();
+				}
+	        }
+	    });
+
+	    ImageButton buttonDialogReplay = (ImageButton) dialog.findViewById(R.id.replay);
+	    imagePath = Environment.getExternalStorageDirectory().toString() + replay;
+	    buttonDialogReplay.setImageDrawable(Drawable.createFromPath(imagePath));
+	    buttonDialogReplay.setOnClickListener(new OnClickListener() {
+	        public void onClick(View v) {
+	            // Do your stuff...
+	            dialog.dismiss();
+				mCurrentKeyPoint = mCurrentKeyPoint < (1) ? (0) : (mCurrentKeyPoint);
+				keypoint kp = mKeyPoints.get(mCurrentKeyPoint);
+				videoview.start();
+				videoview.seekTo(kp.start*1000);
+				mhandler.postDelayed(pausevid,( kp.stop - kp.start)*1000);
+	        }           
+	    });
+	    
+	  
+	    dialog.show();
+	}
 	Handler mVidHandler = new Handler()
 	{
 		@Override
@@ -53,7 +135,10 @@ public class VideoViewActivity extends Activity {
 			if(msg.obj.equals("0"))
 			{
 				videoview.pause();
+				
+				callAlert(VideoViewActivity.this);
 							
+				/*
 				//popup
 				AlertDialog.Builder ad = new AlertDialog.Builder(VideoViewActivity.this);
 				ad.setTitle("")
@@ -108,6 +193,7 @@ public class VideoViewActivity extends Activity {
 				});
 				AlertDialog dia = ad.create();
 				dia.show();
+				*/
 			}
 		}
 	};
