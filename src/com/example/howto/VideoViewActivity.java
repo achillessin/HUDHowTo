@@ -18,6 +18,7 @@ import android.content.DialogInterface;
 import android.util.Log;
 import android.widget.MediaController;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 public class VideoViewActivity extends Activity {
@@ -38,6 +39,9 @@ public class VideoViewActivity extends Activity {
 			
 		}
 	}
+	String tutorialvid = "/DCIM/Videos/vid.mp4";
+	String techSupportVid = "/DCIM/Videos/techsupport.mp4";
+	
 	int mCurrentKeyPoint;
 	List<keypoint> mKeyPoints = new ArrayList<keypoint>();
 	Handler mhandler;
@@ -49,30 +53,57 @@ public class VideoViewActivity extends Activity {
 			if(msg.obj.equals("0"))
 			{
 				videoview.pause();
-				mCurrentKeyPoint = mCurrentKeyPoint > (mKeyPoints.size()-2) ? (mKeyPoints.size()-1) : (mCurrentKeyPoint+1);
-				
+							
 				//popup
 				AlertDialog.Builder ad = new AlertDialog.Builder(VideoViewActivity.this);
 				ad.setTitle("")
-	            .setMessage("Are you keeping up?")
-	            .setPositiveButton("yes",new DialogInterface.OnClickListener() {
+	            .setPositiveButton("Continue",new DialogInterface.OnClickListener() {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						// TODO Auto-generated method stub
 						///return
+						mCurrentKeyPoint = mCurrentKeyPoint > (mKeyPoints.size()-2) ? (mKeyPoints.size()-1) : (mCurrentKeyPoint+1);
 						keypoint kp = mKeyPoints.get(mCurrentKeyPoint);
 						videoview.start();
 						mhandler.postDelayed(pausevid,( kp.stop - kp.start)*1000);
 						
 					}
 				});
-				ad.setNegativeButton("no", new DialogInterface.OnClickListener() {
+				ad.setNegativeButton("Replay", new DialogInterface.OnClickListener() {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						// TODO Auto-generated method stub
-						
+						mCurrentKeyPoint = mCurrentKeyPoint < (1) ? (0) : (mCurrentKeyPoint);
+						keypoint kp = mKeyPoints.get(mCurrentKeyPoint);
+						videoview.start();
+						videoview.seekTo(kp.start*1000);
+						mhandler.postDelayed(pausevid,( kp.stop - kp.start)*1000);
+					}
+				});
+				ad.setNeutralButton("Call Help",new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						videoview.stopPlayback();
+						Toast.makeText(VideoViewActivity.this, "Calling Tech Support...", Toast.LENGTH_LONG).show();
+						try{
+						loadVideo(videoview,techSupportVid);
+						videoview.requestFocus();
+						videoview.setOnPreparedListener(new OnPreparedListener() {
+							// Close the progress bar and play the video
+							public void onPrepared(MediaPlayer mp) {
+								videoview.start();
+							}
+						});
+						}
+						catch(Exception e)
+						{
+							Toast.makeText(VideoViewActivity.this, "Tech support is out for coffee.", Toast.LENGTH_LONG).show();
+						}
+											
 					}
 				});
 				AlertDialog dia = ad.create();
@@ -101,6 +132,9 @@ public class VideoViewActivity extends Activity {
 		mKeyPoints.add(new keypoint(3,6));
 		mKeyPoints.add(new keypoint(6,9));
 		mKeyPoints.add(new keypoint(9,12));
+		mKeyPoints.add(new keypoint(12,15));
+		mKeyPoints.add(new keypoint(15,18));
+		mKeyPoints.add(new keypoint(18,21));
 		// Create a progressbar
 		pDialog = new ProgressDialog(VideoViewActivity.this);
 		// Set progressbar title
@@ -118,7 +152,7 @@ public class VideoViewActivity extends Activity {
 					VideoViewActivity.this);
 			mediacontroller.setAnchorView(videoview);
 			videoview.setMediaController(mediacontroller);
-			loadVideo(videoview);
+			loadVideo(videoview,tutorialvid);
 			mCurrentKeyPoint = 0;
 			
 
@@ -139,19 +173,19 @@ public class VideoViewActivity extends Activity {
 		});
 
 	}
-	private void loadVideo(VideoView v)
+	private void loadVideo(VideoView v, String video)
 	{
 		// Insert your Video URL
 
 		//String videoname ="";
 		//load from sdcard
-		//String path = Environment.getExternalStorageDirectory()+"/videos/"+videoname+".mp4";
-		//videoview.setVideoPath(path);
+		String path = Environment.getExternalStorageDirectory()+video;
+	    videoview.setVideoPath(path);
 		
 		// Get the URL from String VideoURL
-		String VideoURL = "android.resource://com.example.howto/" + R.raw.vid;
-		Uri video = Uri.parse(VideoURL);
-		videoview.setVideoURI(video);
+		//String VideoURL = "android.resource://com.example.howto/" + R.raw.vid;
+		//Uri video = Uri.parse(VideoURL);
+		//videoview.setVideoURI(video);
 		
 
 	}
